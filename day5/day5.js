@@ -16,20 +16,28 @@ const getDestinationValue = (current, map) => {
 }
 
 const getLowestLocationNumber = input => {
-  const seedsCurrentValue = {};
+  let min = null;
 
-  input.seeds.forEach(seed => {
-    seedsCurrentValue[seed] = seed;
-    seedsCurrentValue[seed] = getDestinationValue(seedsCurrentValue[seed], input['seed-to-soil map']);
-    seedsCurrentValue[seed] = getDestinationValue(seedsCurrentValue[seed], input['soil-to-fertilizer map']);
-    seedsCurrentValue[seed] = getDestinationValue(seedsCurrentValue[seed], input['fertilizer-to-water map']);
-    seedsCurrentValue[seed] = getDestinationValue(seedsCurrentValue[seed], input['water-to-light map']);
-    seedsCurrentValue[seed] = getDestinationValue(seedsCurrentValue[seed], input['light-to-temperature map']);
-    seedsCurrentValue[seed] = getDestinationValue(seedsCurrentValue[seed], input['temperature-to-humidity map']);
-    seedsCurrentValue[seed] = getDestinationValue(seedsCurrentValue[seed], input['humidity-to-location map']);
-  });
+  for(let i = 0; i < input.seeds.length; i+=2) {
+    for (let j = 0; j < input.seeds[i+1]; j++) {
+      let n = input.seeds[i+j];
+      let seed2soil = getDestinationValue(n, input['seed-to-soil map']);
+      let soil2Fert = getDestinationValue(seed2soil, input['soil-to-fertilizer map']);
+      let fert2water = getDestinationValue(soil2Fert, input['fertilizer-to-water map']);
+      let water2light = getDestinationValue(fert2water, input['water-to-light map']);
+      let light2temp = getDestinationValue(water2light, input['light-to-temperature map']);
+      let temp2humid = getDestinationValue(light2temp, input['temperature-to-humidity map']);
+      let humid2loc = getDestinationValue(temp2humid, input['humidity-to-location map']);
 
-  return Object.values(seedsCurrentValue).sort((a, b) => a - b)[0];
+      if(Number(min) && min > humid2loc) {
+        min = humid2loc;
+      } if(!min) {
+        min = humid2loc;
+      }
+    }
+  }
+
+  return min;
 }
 
 // getting the input
@@ -50,13 +58,7 @@ const mapsDict = {}
 
 seeds = seeds.split(':')[1].split(' ').filter(element => element !== '').map(n => parseInt(n, 10));;
 
-mapsDict.seeds = [];
-
-for(let i = 0; i < seeds.length; i+=2) {
-  for (let j = 0; j < seeds[i+1]; j++) {
-    mapsDict.seeds.push(seeds[i] + j)
-  }
-}
+mapsDict.seeds = seeds;
 
 let newContent = false;
 let currentMap = ''
